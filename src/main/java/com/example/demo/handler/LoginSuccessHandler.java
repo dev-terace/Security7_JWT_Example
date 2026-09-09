@@ -1,6 +1,8 @@
 package com.example.demo.handler;
 
 
+import com.example.demo.domain.jwt.entity.RefreshEntity;
+import com.example.demo.domain.jwt.repository.RefreshRepository;
 import com.example.demo.utils.JWTUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,9 +17,11 @@ import java.io.IOException;
 public class LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private final JWTUtil jwtUtil;
+    private final RefreshRepository refreshRepository;
 
-    public LoginSuccessHandler(JWTUtil jwtUtil) {
+    public LoginSuccessHandler(JWTUtil jwtUtil, RefreshRepository refreshRepository) {
         this.jwtUtil = jwtUtil;
+        this.refreshRepository = refreshRepository;
     }
 
     @Override
@@ -27,13 +31,20 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         String role = authentication.getAuthorities().iterator().next().getAuthority();
 
         String accessToken = jwtUtil.createAccessToken(username, role);
+        String refreshToken = jwtUtil.createRefreshToken(username, role);
 
+
+        RefreshEntity refreshEntity = new RefreshEntity();
+        refreshEntity.setUsername(username);
+        refreshEntity.setRefresh(refreshToken);
+
+        refreshRepository.save(refreshEntity);
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
 
 
-        String json = String.format("{\"accessToken\":\"%s\"}", accessToken);
+        String json = String.format("{\"accessToken\":\"%s\",\"refreshToken\":\"%s\"}", accessToken, refreshToken);
         response.getWriter().write(json);
         response.getWriter().flush();
 

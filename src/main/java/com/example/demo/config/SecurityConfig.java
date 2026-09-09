@@ -79,6 +79,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/join").permitAll()
+                        .requestMatchers("/api/v1/jwt/refresh").permitAll()
                         .requestMatchers("/api/v1/").permitAll()
                         .requestMatchers("/api/v1/user").hasRole("USER")
                         .anyRequest().hasRole("ADMIN")

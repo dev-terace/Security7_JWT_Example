@@ -2,6 +2,7 @@ package com.example.demo.filter;
 
 import com.example.demo.utils.JWTUtil;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -69,13 +70,16 @@ public class JWTFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
 
-        }catch (Exception e)
-        {
+        }catch (ExpiredJwtException e) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.setContentType("application/json;charset=UTF-8");
-            response.getWriter().write("{\"error\":\"토큰 만료 또는 유효하지 않은 토큰\"}");
-            return;
+            response.getWriter().write("{\"error\":\"토큰이 만료되었습니다.\"}");
+        } catch (Exception e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"error\":\"유효하지 않은 토큰입니다.\"}");
         }
-        }
+
+    }
 
 }
